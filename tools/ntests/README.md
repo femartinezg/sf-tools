@@ -49,6 +49,6 @@ que no requieran test y con las que no siguan la convención.
 
 ## Limitaciones
 
-- Si una clase está cubierta por varias clases tests, la herramienta solo encotrará la primera.
+- Si una clase está cubierta por varias clases tests, la herramienta encotrará todas las que hagan match con la convención de nombres, sin embargo, no se puede añadir la misma clase varias veces al archivo de excepciones.
 - Si se usan ambos parámetros -s y -t es posible que la herramienta no devuelva todos los tests. Esto se debe a que utiliza los archivos locales para buscar las clases test por lo que depende de la rama actual en la que te encuentres. El uso habitual será únicamente con el parámetro -t por lo que no ocurrirá este problema.
 - No se ha probado en otros sistemas fuera de Windows ni con otros clientes Bash fuera de GitBash.
