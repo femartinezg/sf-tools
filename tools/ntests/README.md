@@ -38,7 +38,7 @@ Para crear en cmd:
 
 1. Ir a tu carpeta personal (C:\Users\\\<user>).
 2. Editar el archivo macros.doskey (crearlo si no existe)
-3. Añadir la siguiente linea: nt="C:\Program Files\Git\bin\bash.exe" -c "\<path>/\<to>/\<tool>/ntests.sh $*"
+3. Añadir la siguiente linea: nt="C:\Program Files\Git\bin\bash.exe" -c "\<path>\\\<to>\\\<tool>\\ntests.sh $*"
 4. Ejecutar el siguiente comando en cmd: C:\WINDOWS\system32\cmd.exe /k "DOSKEY /macrofile=C:\Users\\\<user>\macros.doskey"
 5. En VSCode, editar setting *Terminal > Integrated > Profiles: Windows* y hacer click en *Edit in settings.json*. En este archivo añadir la siguiente lista de argumentos: "args": ["/k", "DOSKEY", "/macrofile=C:\\Users\\\<user>\\macros.doskey"]
 
