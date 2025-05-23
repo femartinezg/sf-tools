@@ -45,12 +45,18 @@ python profile_tool.py [-f] [profile_name ...]
 
 ### Options
 
-- `-f`, `--format`: Only format the profiles without retrieving them.
+- `-f`, `--format`: Format only, without retrieving profiles.
+- `-n`, `--no-clean`: Do not clean the profiles, keep all the elements.
 - `-h`, `--help`: Display the help message.
 
 ## Configuration
 
+> [!WARNING]
+> Modifying the configuration without reviewing potential side effects may cause errors in the tool.
+
 The script includes customizable settings:
 
-- **`AVOID_ONE_LINER`**: List of XML tags to avoid formatting as one-liners.
-- **`SORT_ORDER`**: Dictionary defining the sorting order for XML elements.
+- **`AVOID_ONE_LINER`**: List of XML tags that should not be formatted as one-liners.
+- **`SORT_ORDER`**: Dictionary that defines the sorting order for XML elements.
+- **`rules/profile_clean_patterns`**: Patterns to exclude lines from files.
+- **`rules/profile_include_patterns`**: Patterns to include lines in files. Include patterns take precedence over clean patterns.

@@ -1,0 +1,33 @@
+# Incluir cusotm objects (no packages)
+<objectPermissions>.*<object>(?!\w+__\w+__c)[^<]*__c</object>.*
+<objectPermissions>.*<object>(?!\w+__\w+__e)[^<]*__e</object>.*
+
+# Objetos estándar a incluir
+<objectPermissions>.*<object>Account</object>.*
+<objectPermissions>.*<object>Asset</object>.*
+<objectPermissions>.*<object>Case</object>.*
+<objectPermissions>.*<object>Contact</object>.*
+<objectPermissions>.*<object>Contract</object>.*
+<objectPermissions>.*<object>Document</object>.*
+<objectPermissions>.*<object>Lead</object>.*
+<objectPermissions>.*<object>MessagingEndUser</object>.*
+<objectPermissions>.*<object>MessagingSession</object>.*
+<objectPermissions>.*<object>Order</object>.*
+<objectPermissions>.*<object>OrderItem</object>.*
+<objectPermissions>.*<object>Pricebook2</object>.*
+<objectPermissions>.*<object>Product2</object>.*
+
+# Objetos de paquetes a incluir
+<objectPermissions>.*<object>vlocity_cmt__AccountAppliedPromotionItem__c</object>.*
+<objectPermissions>.*<object>vlocity_cmt__AccountAppliedPromotion__c</object>.*
+<objectPermissions>.*<object>vlocity_cmt__AccountPriceAdjustment__c</object>.*
+<objectPermissions>.*<object>vlocity_cmt__OrderAppliedPromotionItem__c</object>.*
+<objectPermissions>.*<object>vlocity_cmt__OrderAppliedPromotion__c</object>.*
+<objectPermissions>.*<object>vlocity_cmt__OrderPriceAdjustment__c</object>.*
+<objectPermissions>.*<object>vlocity_cmt__PaymentMethod__c</object>.*
+<objectPermissions>.*<object>vlocity_cmt__Premises__c</object>.*
+<objectPermissions>.*<object>vlocity_cmt__PriceListEntry__c</object>.*
+<objectPermissions>.*<object>vlocity_cmt__PriceList__c</object>.*
+<objectPermissions>.*<object>vlocity_cmt__Promotion__c</object>.*
+<objectPermissions>.*<object>vlocity_cmt__ServicePoint__c</object>.*
+<objectPermissions>.*<object>vlocity_cmt__VlocityAttachment__c</object>.*

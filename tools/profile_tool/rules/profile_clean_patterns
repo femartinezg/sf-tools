@@ -1,0 +1,20 @@
+# Excluir permisos ausentes
+<applicationVisibilities>.*<visible>false</visible>
+<classAccesses>.*<enabled>false</enabled>
+<externalDataSourceAccesses>.*<enabled>false</enabled>
+<fieldPermissions>.*<readable>false</readable>
+<flowAccesses>.*<enabled>false</enabled>
+<pageAccesses>.*<enabled>false</enabled>
+<recordTypeVisibilities><visible>false</visible>
+<tabVisibilities>.*<visibility>Hidden</visibility>
+
+# Excluir packages
+.*datamask__.*
+.*guar__.*
+
+# Excluir objects, los necesarios se añadirán a profile_include_patterns
+<objectPermissions>.*
+
+# Excluir tags
+<pageAccesses>.*
+<classAccesses>.*

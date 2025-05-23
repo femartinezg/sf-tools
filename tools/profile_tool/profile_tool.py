@@ -4,6 +4,7 @@ import sys
 import subprocess
 import time
 import threading
+import os
 
 # SETTINGS (modify as needed)
 AVOID_ONE_LINER = ['loginIpRanges', 'loginHours']
@@ -28,12 +29,18 @@ SORT_ORDER = {
 }
 
 # CONSTANTS
-HELP = '''Usage: python profile_tool.py [-f] [profile_name ...]
+HELP = '''Usage: python profile_tool.py [-f] [-n] [profile_name ...]
+
+Options:
+  -f, --format      Format only, without retrieving profiles.
+  -n, --no-clean    Do not clean the profiles, keep all the elements.
 
 Examples:
     python profile_tool.py Admin
     python profile_tool.py Admin "My profile" "Another profile"
-    python profile_tool.py -f Admin "My profile" "Another profile" (only format)'''
+    python profile_tool.py -f Admin "My profile" "Another profile"
+    python profile_tool.py -n Admin "My profile" "Another profile"
+    python profile_tool.py -f -n Admin "My profile" "Another profile"'''
 
 SORT_BLOCK_KEYS = {
     'applicationVisibilities': 'application',
@@ -56,6 +63,8 @@ SORT_BLOCK_KEYS = {
 # Argument parsing functions
 def parse_args():
     only_format = False
+    clean = True
+    profile_names = []
     
     # Display help
     for arg in sys.argv[1:]:
@@ -63,16 +72,17 @@ def parse_args():
             sys.exit(HELP)
         if arg == "-f" or arg == "--format":
             only_format = True
+        if arg == "-n" or arg == "--no-clean":
+            clean = False
+        if not arg.startswith("-"):
+            profile_names.append(arg)
+        else:
+            sys.exit(HELP)
 
-    # Profiles
-    if only_format and len(sys.argv) > 2:
-        profile_names = sys.argv[2:]
-    elif not only_format and len(sys.argv) > 1:
-        profile_names = sys.argv[1:]
-    else:
+    if not profile_names:
         sys.exit(HELP)
 
-    return only_format, profile_names
+    return only_format, clean, profile_names
 
 # Retrieve functions
 def retrieve_profiles(profile_names):
@@ -129,7 +139,89 @@ def format_output(root):
             last_elem.tail = "\n" + last_elem.tail
         last_elem = child
 
-def format_profile(input_path):
+def clean_output(input_path):
+    script_path = os.path.dirname(os.path.abspath(__file__))
+    clean_file_path = os.path.join(script_path, "rules", "profile_clean_patterns")
+    include_file_path = os.path.join(script_path, "rules", "profile_include_patterns")
+    lines = []
+    with open(input_path, 'r', encoding='utf-8') as profile_file:
+        lines = profile_file.readlines()
+
+    clean_patterns = get_file_patterns(clean_file_path)
+    inlcude_patterns = get_file_patterns(include_file_path)
+    lines = clean_lines_patterns(lines, clean_patterns, inlcude_patterns)
+    object_permissions = get_object_permissions(lines)
+    lines = clean_missing_objects(lines, object_permissions)
+    write_clean_profile(input_path, lines)
+
+def get_file_patterns(file_path):
+    patterns = []
+
+    with open(file_path, 'r', encoding='utf-8') as file:
+        for line in file:
+            if line.strip() and not line.startswith("#"):
+                patterns.append(rf"{line.strip()}")
+    
+    return patterns
+
+def clean_lines_patterns(lines, clean_patterns, inlcude_patterns):
+    lines_aux = []
+
+    for line in lines:
+        if not any(re.search(pattern, line) for pattern in clean_patterns):
+            lines_aux.append(line)
+        elif any(re.search(pattern, line) for pattern in inlcude_patterns):
+            lines_aux.append(line)
+    
+    return lines_aux
+
+def get_object_permissions(lines):
+    object_permissions = []
+
+    for line in lines:
+        if '<objectPermissions>' in line:
+            object_permissions.append(line.split('<object>')[1].split('</object>')[0])
+    
+    return object_permissions
+
+def clean_missing_objects(lines, object_permissions):
+    lines_aux = []
+
+    for line in lines:
+            if '<fieldPermissions>' in line:
+                obj = line.split('<field>')[1].split('.')[0]
+                if obj in object_permissions:
+                    lines_aux.append(line)
+            elif '<layoutAssignments>' in line:
+                obj = line.split('<layout>')[1].split('-')[0]
+                if obj in object_permissions:
+                    lines_aux.append(line)
+            elif '<recordTypeVisibilities>' in line:
+                obj = line.split('<recordType>')[1].split('.')[0]
+                if obj in object_permissions:
+                    lines_aux.append(line)
+            elif '<tabVisibilities>' in line:
+                obj = line.split('<tab>')[1].split('</tab>')[0]
+                if obj in object_permissions:
+                    lines_aux.append(line)
+            else:
+                lines_aux.append(line)
+
+    return lines_aux
+
+def write_clean_profile(input_path, lines):
+    with open(input_path, 'w', encoding='utf-8') as profile_file:
+        previous_blank_line = False
+        for line in lines:
+            if not line.strip():
+                if previous_blank_line:
+                    continue
+                previous_blank_line = True
+            else:
+                previous_blank_line = False
+            profile_file.write(line)
+
+def format_profile(input_path, clean):
     # Formats one profile XML file
     tree, root = init_xml_parser(input_path)
     sort_inner_keys(root)
@@ -139,11 +231,14 @@ def format_profile(input_path):
     format_output(root)
     # Write profile
     tree.write(input_path, encoding='utf-8', xml_declaration=True)
+    # Clean profile
+    if clean:
+        clean_output(input_path)
 
-def format_profiles(profile_names):
+def format_profiles(profile_names, clean):
     for profile_name in profile_names:
         input_path = f"force-app/main/default/profiles/{profile_name}.profile-meta.xml"
-        format_profile(input_path)
+        format_profile(input_path, clean)
 
 # Timer functions
 def show_timer(message, stop_event):
@@ -170,7 +265,7 @@ def stop_timer(stop_event, timer):
 
 try:
     # Parse arguments
-    only_format, profile_names = parse_args()
+    only_format, clean, profile_names = parse_args()
 
     # Retrieve profile
     if not only_format:
@@ -180,14 +275,14 @@ try:
 
     # Format profile
     stop_event, timer = init_timer("> Formatting profiles...")
-    format_profiles(profile_names)
+    format_profiles(profile_names, clean)
     stop_timer(stop_event, timer)
 
     # Done
-    print("DONE")
+    print("\n✓ DONE")
 except KeyboardInterrupt:
     print("\nExiting...")
 except subprocess.CalledProcessError as e:
-    print(f"\nError: {e}\nPlease check if the profile names are correct.")
+    print(f"\n✗ Error: {e}\nPlease check if the profile names are correct.")
 except Exception as e:
-    print(f"\nUnexpected error: {e}")
+    print(f"\n✗ Unexpected error: {e}")
