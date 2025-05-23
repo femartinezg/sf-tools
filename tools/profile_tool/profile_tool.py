@@ -70,11 +70,11 @@ def parse_args():
     for arg in sys.argv[1:]:
         if arg == "-h" or arg == "--help":
             sys.exit(HELP)
-        if arg == "-f" or arg == "--format":
+        elif arg == "-f" or arg == "--format":
             only_format = True
-        if arg == "-n" or arg == "--no-clean":
+        elif arg == "-n" or arg == "--no-clean":
             clean = False
-        if not arg.startswith("-"):
+        elif not arg.startswith("-"):
             profile_names.append(arg)
         else:
             sys.exit(HELP)
