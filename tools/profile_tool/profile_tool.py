@@ -9,7 +9,7 @@ import os
 # SETTINGS (modify as needed)
 AVOID_ONE_LINER = ['loginIpRanges', 'loginHours']
 SORT_ORDER = {
-    'Profile': ['fullName', 'description', 'custom', 'userLicense', 'loginIpRanges', 'loginHours'],
+    '{http://soap.sforce.com/2006/04/metadata}Profile': ['fullName', 'description', 'custom', 'userLicense', 'loginIpRanges', 'loginHours'],
     'applicationVisibilities': ['visible', 'default', 'application'],
     'classAccesses': ['enabled', 'apexClass'],
     'customMetadataTypeAccesses': ['enabled', 'name'],
@@ -91,12 +91,17 @@ def retrieve_profiles(profile_names):
 
 # Format functions
 def init_xml_parser(input_path):
+    ET.register_namespace('', 'http://soap.sforce.com/2006/04/metadata')
     tree = ET.parse(input_path)
     root = tree.getroot()
 
-    # Remove namespace prefixes
+    # Set/unset namespaces
     for elem in root.iter():
-        elem.tag = elem.tag.split('}', 1)[-1]
+        if 'Profile' in elem.tag:
+            elem.tag = '{http://soap.sforce.com/2006/04/metadata}Profile'
+            break
+        else:
+            elem.tag = elem.tag.split('}', 1)[-1]
     
     return tree, root
 
@@ -135,7 +140,7 @@ def format_output(root):
     # Separate sections with new lines
     last_elem = root
     for child in root:
-        if last_elem.tag != child.tag and child.tag not in SORT_ORDER['Profile'] and last_elem.tail is not None:
+        if last_elem.tag != child.tag and child.tag not in SORT_ORDER['{http://soap.sforce.com/2006/04/metadata}Profile'] and last_elem.tail is not None:
             last_elem.tail = "\n" + last_elem.tail
         last_elem = child
 
