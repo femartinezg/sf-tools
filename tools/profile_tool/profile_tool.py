@@ -185,7 +185,10 @@ def get_object_permissions(lines):
 
     for line in lines:
         if '<objectPermissions>' in line:
-            object_permissions.append(line.split('<object>')[1].split('</object>')[0])
+            object_name = line.split('<object>')[1].split('</object>')[0]
+            object_permissions.append(object_name)
+            if 'Order' == object_name:
+                object_permissions.append('OrderItem')
     
     return object_permissions
 
