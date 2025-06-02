@@ -99,7 +99,6 @@ def init_xml_parser(input_path):
     for elem in root.iter():
         if 'Profile' in elem.tag:
             elem.tag = '{http://soap.sforce.com/2006/04/metadata}Profile'
-            break
         else:
             elem.tag = elem.tag.split('}', 1)[-1]
     
@@ -157,6 +156,7 @@ def clean_output(input_path):
     lines = clean_lines_patterns(lines, clean_patterns, inlcude_patterns)
     object_permissions = get_object_permissions(lines)
     lines = clean_missing_objects(lines, object_permissions)
+    #lines = clean_person_account(lines)
     write_clean_profile(input_path, lines)
 
 def get_file_patterns(file_path):
@@ -215,6 +215,14 @@ def clean_missing_objects(lines, object_permissions):
             else:
                 lines_aux.append(line)
 
+    return lines_aux
+
+def clean_person_account(lines):
+    lines_aux = []
+    for line in lines:
+        if '<recordTypeVisibilities>' in line and '<personAccountDefault>' in line:
+            line = line.replace('<personAccountDefault>true</personAccountDefault>', '')
+        lines_aux.append(line)
     return lines_aux
 
 def write_clean_profile(input_path, lines):
